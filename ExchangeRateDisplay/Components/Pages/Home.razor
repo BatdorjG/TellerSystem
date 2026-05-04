@@ -1,0 +1,134 @@
+﻿@page "/"
+@using System.Net.Http.Json
+@using Microsoft.Extensions.FileSystemGlobbing.Internal.PathSegments
+@using System.ComponentModel.DataAnnotations
+@using System.Security.Cryptography
+@inject HttpClient http
+@rendermode InteractiveServer
+
+<PageTitle>Rates</PageTitle>
+
+@if (exchangeRates == null) {
+    <p><em>Уншиж байна...</em></p>
+} else {
+    <p>Last Updated @CleanedTimestamp(exchangeRates.Timestamp)</p>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Валют (Currency)</th>
+                <th>Валютын нэр</th>
+                <th>Ханш (Rate)</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var rate in rates) {
+                <tr>
+                    <td>@rate.Key</td>
+                    <td>@rate.Name</td>
+                    <td>@(CurrencyFixer(rate.Value).ToString("0.00"))</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private ExchangeRates? exchangeRates;
+    private List<Rates> rates = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        string api = "https://fxapi.app/api/MNT.json";
+        
+        exchangeRates = await http.GetFromJsonAsync<ExchangeRates>(api);
+        populateRate();
+    }
+
+    public class ExchangeRates {
+        public string Base { get; set; } = "";
+        public string Timestamp { get; set; } = "";
+        
+        public Dictionary<string, float?> rates { get; set; } = new();
+    }
+
+    public class Rates {
+        public string Key { get; set; }
+        public string Name { get; set; }
+        public float Value { get; set; }
+
+        public Rates(string k, string n, float v) {
+            Key = k; Name = n; Value = v;
+        }
+    }
+
+    private void populateRate() {
+        if (exchangeRates == null) {
+            return;
+        }
+        Console.WriteLine("Reached here");
+        foreach(var rate in exchangeRates.rates) {
+            if (CurrencyName(rate.Key) != null && rate.Value != null) {
+
+                var rateName = CurrencyName(rate.Key);
+                var rateValue = (float)rate.Value;
+
+                Rates newRate;
+                if (rateName != null) {
+                    newRate = new(rate.Key, rateName, rateValue);
+                } else {
+                    newRate = new("", "", 0);
+                }
+
+                rates.Add(newRate);
+            }
+        }
+    }
+
+    public string CleanedTimestamp(string Timestamp) {
+        DateTime dateTime = DateTime.Parse(Timestamp);
+        return dateTime.ToLocalTime().ToString();
+    }
+
+    public string? CurrencyName(string Key) {
+        if(Key == "USD") {
+            return "АМЕРИК ДОЛЛАР";
+        } else if (Key == "EUR") {
+            return "EВРО";
+        } else if (Key == "JPY") {
+            return "ЯПОНЫ ИЕН";
+        } else if (Key == "CHF") {
+            return "ШВЕЙЦАР ФРАНК";
+        } else if (Key == "GBP") {
+            return "АНГЛИЙН ФУНТ";
+        } else if (Key == "HKD") {
+            return "ГОНКОНГ ДОЛЛАР";
+        } else if (Key == "CNY") {
+            return "ХЯТАДЫН ЮАНЬ";
+        } else if (Key == "KRW") {
+            return "БНСУ-ЫН ВОН";
+        } else if (Key == "CAD") {
+            return "КАНАД ДОЛЛАР";
+        } else if (Key == "AUD") {
+            return "АВСТРАЛИ ДОЛЛАР";
+        } else if (Key == "SDG") {
+            return "СИНГАПУР ДОЛЛАР";
+        } else if (Key == "NZD") {
+            return "ШИНЭ ЗЕЛАНД ДОЛЛАР";
+        }
+        return null;
+    }
+
+    public float CurrencyFixer(float? Value) {
+        if (Value == null)
+            return 0;
+        float fixedValue;
+        
+        if (Value != 0) {
+            fixedValue = 1 / (float)Value;
+        } else {
+            fixedValue = 0;
+        }
+        return fixedValue;
+    }
+
+}

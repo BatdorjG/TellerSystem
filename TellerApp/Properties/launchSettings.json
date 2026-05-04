@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "TellerApp (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "TellerApp (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
