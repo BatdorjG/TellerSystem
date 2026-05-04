@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Levth\\source\\repos\\ExchangeRateDisplay\\ExchangeRateDisplay.csproj": {}
+    "C:\\Users\\Levth\\Documents\\TellerSystem\\ExchangeRateDisplay\\ExchangeRateDisplay.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Levth\\source\\repos\\ExchangeRateDisplay\\ExchangeRateDisplay.csproj": {
+    "C:\\Users\\Levth\\Documents\\TellerSystem\\ExchangeRateDisplay\\ExchangeRateDisplay.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Levth\\source\\repos\\ExchangeRateDisplay\\ExchangeRateDisplay.csproj",
+        "projectUniqueName": "C:\\Users\\Levth\\Documents\\TellerSystem\\ExchangeRateDisplay\\ExchangeRateDisplay.csproj",
         "projectName": "ExchangeRateDisplay",
-        "projectPath": "C:\\Users\\Levth\\source\\repos\\ExchangeRateDisplay\\ExchangeRateDisplay.csproj",
+        "projectPath": "C:\\Users\\Levth\\Documents\\TellerSystem\\ExchangeRateDisplay\\ExchangeRateDisplay.csproj",
         "packagesPath": "C:\\Users\\Levth\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Levth\\source\\repos\\ExchangeRateDisplay\\obj\\",
+        "outputPath": "C:\\Users\\Levth\\Documents\\TellerSystem\\ExchangeRateDisplay\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -31,6 +31,7 @@
         },
         "frameworks": {
           "net10.0": {
+            "framework": "net10.0",
             "targetAlias": "net10.0",
             "projectReferences": {}
           }
@@ -49,6 +50,7 @@
       },
       "frameworks": {
         "net10.0": {
+          "framework": "net10.0",
           "targetAlias": "net10.0",
           "dependencies": {
             "Microsoft.AspNetCore.App.Internal.Assets": {

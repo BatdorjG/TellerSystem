@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "/tWIka5EYt8=",
+  "dgSpecHash": "91YJSU06Ixo=",
   "success": true,
-  "projectFilePath": "C:\\Users\\Levth\\source\\repos\\ExchangeRateDisplay\\ExchangeRateDisplay.csproj",
+  "projectFilePath": "C:\\Users\\Levth\\Documents\\TellerSystem\\ExchangeRateDisplay\\ExchangeRateDisplay.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Levth\\.nuget\\packages\\microsoft.aspnetcore.app.internal.assets\\10.0.6\\microsoft.aspnetcore.app.internal.assets.10.0.6.nupkg.sha512"
   ],
