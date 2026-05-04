@@ -1,4 +1,42 @@
+## Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+[Ww][Ii][Nn][32]/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
 [Bb]in/
 [Oo]bj/
+[Ll]og/
+[Ll]ogs/
 
+## Visual Studio files
 .vs/
+*.user
+*.userosscache
+*.sln.docstates
+
+## Project specific stuff
+# If you use secrets.json for your Server or ExchangeRateDisplay
+**/Properties/launchSettings.json
+**/appsettings.Development.json
+
+## .NET Core / .NET 10.0+ 
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+## Scoped CSS / Blazor (for ExchangeRateDisplay)
+*.css.bundle
+
+## OS files
+.DS_Store
+Thumbs.db
+
+## GitHub Workflows (Optional)
+# If you want to keep workflows but ignore temporary run data
+!/.github/workflows/
