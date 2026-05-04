@@ -30,7 +30,8 @@
           "https://www.nuget.org/api/v2": {}
         },
         "frameworks": {
-          "net10.0-windows7.0": {
+          "net10.0-windows": {
+            "framework": "net10.0-windows7.0",
             "targetAlias": "net10.0-windows",
             "projectReferences": {}
           }
@@ -48,8 +49,15 @@
         "SdkAnalysisLevel": "10.0.200"
       },
       "frameworks": {
-        "net10.0-windows7.0": {
+        "net10.0-windows": {
+          "framework": "net10.0-windows7.0",
           "targetAlias": "net10.0-windows",
+          "dependencies": {
+            "QuestPDF": {
+              "target": "Package",
+              "version": "[2026.2.4, )"
+            }
+          },
           "imports": [
             "net461",
             "net462",
