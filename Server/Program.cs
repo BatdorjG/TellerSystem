@@ -1,8 +1,16 @@
 using System.Net;
+using System.Security.Cryptography.X509Certificates;
 using QueueService;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi();
+builder.Services.AddSingleton<CustomerQueue>();
+
+builder.Services.AddSingleton<SocketServer>();
+
+builder.Services.AddHostedService(provider =>
+    provider.GetRequiredService<SocketServer>());
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -11,20 +19,33 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-IPAddress ipAddress = ipHostInfo.AddressList[0];
-IPEndPoint iPEndPoint = new(ipAddress, 11_000);
-var _customerQueue = CustomerQueue.GetInstance();
 
-app.MapGet("/CustomerQueue", () =>
+app.MapGet("/CustomerQueue", (CustomerQueue queue) =>
 {
-    var value = _customerQueue.EnqueueCustomer();
-    return value;
+    var value = queue.EnqueueCustomer();
+    return Results.Ok(value);
 });
 
-app.MapGet("/NextCustomer", (int tellerId) =>
+app.MapGet("/NextCustomer", async (
+    byte tellerId,
+    CustomerQueue queue,
+    SocketServer socketServer) =>
 {
-    var value = _customerQueue.DequeueCustomer();
-    
+    if (!queue.TryDequeueCustomer(out byte customerNumber))
+    {
+        return Results.NotFound("No customers waiting.");
+    }
+
+    byte displayId = tellerId;
+
+    await socketServer.SendCallAsync(displayId, tellerId, customerNumber);
+
+    return Results.Ok(new
+    {
+        tellerId,
+        displayId,
+        customerNumber
+    });
 });
 
 app.Run();

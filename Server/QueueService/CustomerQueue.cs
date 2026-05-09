@@ -1,59 +1,56 @@
-using System;
-using System.Collections.Generic;
-using System.Diagnostics.Contracts;
-
 namespace QueueService;
 
-/// <summary>
-/// Customer Queue class to make this class make only one object
-/// used Singleton design pattern this class queues number representing customer
-/// and when teller calls touch's a button represening a next customer
-/// dequeue and send that to display using socket server 
-/// </summary>
-public sealed class CustomerQueue 
+public sealed class CustomerQueue
 {
-    private static CustomerQueue _instance;
-    
-    private static readonly object _lock = new object();
+    private readonly Queue<byte> _queue = new();
+    private readonly object _lock = new();
+    //used byte for the queue to save little bit less memory usage;
+    private byte number = 1;
 
-    private readonly Queue<byte> _queue = new Queue<byte>();
-
-    private byte number;
-
-    private CustomerQueue()
-    {
-        number = 1;
-        Console.WriteLine("Customer queue created");
-    }
-
-    public static CustomerQueue GetInstance()
-    {
-        if (_instance == null)
-        {
-            lock (_lock)
-            {
-                if (_instance == null)
-                {
-                    _instance = new CustomerQueue();
-                }
-            }
-        }
-        return _instance;
-    }
-    //Enqueue's a number for customer and sends it 
-    //to the printer back for it to print or something
     public byte EnqueueCustomer()
     {
-        var value = number++; 
-        _queue.Enqueue(value);
-        return value;
+        lock (_lock)
+        {
+            //Isnt possible unless 255 customer is in the building
+            if (_queue.Count >= 255)
+                throw new InvalidOperationException("Queue is full.");
+
+            byte value = number;
+
+            //If number is in queue we skip that number and 
+            //search for a number that is not in the queue
+            while (_queue.Contains(value))
+            {
+                value++;
+
+                if (value == 0)
+                    value = 1;
+            }
+
+            number = value;
+            _queue.Enqueue(value);
+
+            number++;
+            // if byte overflows from 255 its going to become 0 so check if overflowed 
+            // and if its overflowed change the number to 1
+            if (number == 0)
+                number = 1;
+
+            return value;
+        }
     }
-    
-
-
-    public byte DequeueCustomer()
+    public bool TryDequeueCustomer(out byte value)
     {
-        var value = _queue.Dequeue();
-        return value;
+        lock (_lock)
+        {
+            if (_queue.Count == 0)
+            {
+                value = 0;
+                return false;
+            }
+
+            value = _queue.Dequeue();
+            return true;
+        }
     }
 }
