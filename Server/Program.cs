@@ -4,8 +4,12 @@ using System.Security.Cryptography.X509Certificates;
 using QueueService;
 using Repository; 
 using db;
+using Microsoft.AspNetCore.SignalR;
+
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi();
+builder.Services.AddSignalR();
+builder.Services.AddSingleton<CurrencyRateRepos>();
 builder.Services.AddSingleton<CustomerQueue>();
 
 builder.Services.AddSingleton<SocketServer>();
@@ -14,6 +18,8 @@ builder.Services.AddHostedService(provider =>
     provider.GetRequiredService<SocketServer>());
 
 var app = builder.Build();
+
+app.MapHub<CurrencyRateHub>("/currencyRateHub");
 
 if (app.Environment.IsDevelopment())
 {
@@ -64,11 +70,31 @@ app.MapGet("/NextCustomer", async (
     });
 });
 
-// app.MapGet("/", async (CurrencyRateRepos currencyRateRepos) =>
-// {
-//     var rates = currencyRateRepos.GetRates();
+app.MapGet("/CurrencyRates", async (CurrencyRateRepos repo) =>
+{
+    var rates = await repo.GetAll();
+    return Results.Ok(rates);
+});
 
-//     return Results.Ok(rates);
-// });
+app.MapPut("/CurrencyRates/{code}", async (
+    string code,
+    double rate,
+    CurrencyRateRepos repo,
+    IHubContext<CurrencyRateHub> hub) =>
+{
+    code = code.ToUpper();
+
+    await repo.Upsert(code, rate);
+
+    var updatedRate = new CurrencyRate
+    {
+        Code = code,
+        Rate = rate
+    };
+
+    await hub.Clients.All.SendAsync("CurrencyRateUpdated", updatedRate);
+
+    return Results.Ok(updatedRate);
+});
 
 app.Run();
