@@ -4,7 +4,7 @@ using System.Net.Sockets;
 
 public class SocketServer : BackgroundService
 {
-    private readonly ConcurrentDictionary<byte, TcpClient> _displays = new();
+    private readonly ConcurrentDictionary<int, TcpClient> _displays = new();
 
     private const int Port = 9000;
 
@@ -100,7 +100,7 @@ public class SocketServer : BackgroundService
         }
     }
 
-    public async Task SendCallAsync(byte displayId, byte tellerId, byte customerNumber)
+    public async Task SendCallAsync(int displayId, int tellerId, int customerNumber)
     {
         if (!_displays.TryGetValue(displayId, out TcpClient? client))
         {
@@ -115,9 +115,9 @@ public class SocketServer : BackgroundService
             var packet = new SocketPacket
             {
                 Command = SocketCommand.CALL,
-                DisplayId = displayId,
-                CustomerNumber = customerNumber,
-                TellerId = tellerId,
+                DisplayId = (byte)displayId,
+                CustomerNumber = (byte)customerNumber,
+                TellerId = (byte)tellerId,
                 Key1 = 0,
                 Key2 = 0,
                 Key3 = 0

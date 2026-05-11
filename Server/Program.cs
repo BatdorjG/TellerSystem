@@ -1,13 +1,15 @@
+using System.Data.Common;
 using System.Net;
 using System.Security.Cryptography.X509Certificates;
 using QueueService;
-
+using Repository; 
+using db;
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi();
 builder.Services.AddSingleton<CustomerQueue>();
 
 builder.Services.AddSingleton<SocketServer>();
-
+builder.Services.AddSingleton<CurrencyRateRepos>();
 builder.Services.AddHostedService(provider =>
     provider.GetRequiredService<SocketServer>());
 
@@ -20,32 +22,53 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.MapGet("/CustomerQueue", (CustomerQueue queue) =>
+app.MapGet("/StartDB", () =>
 {
-    var value = queue.EnqueueCustomer();
+    DB _db = new();
+    _db.Init();
+    return Results.Ok();
+});
+
+app.MapGet("/CleanQueue", async (CustomerQueue queue) =>
+{
+    await queue.CleanQueue();
+    return Results.Ok();
+});
+
+app.MapGet("/CustomerQueue", async (CustomerQueue queue) =>
+{
+    var value = await queue.EnqueueCustomer();
     return Results.Ok(value);
 });
 
 app.MapGet("/NextCustomer", async (
-    byte tellerId,
+    int displayId,
+    int tellerId,
     CustomerQueue queue,
     SocketServer socketServer) =>
 {
-    if (!queue.TryDequeueCustomer(out byte customerNumber))
+    int? customerNumber = await queue.DequeueCustomer();
+
+    if (customerNumber == null)
     {
         return Results.NotFound("No customers waiting.");
     }
 
-    byte displayId = tellerId;
-
-    await socketServer.SendCallAsync(displayId, tellerId, customerNumber);
+    await socketServer.SendCallAsync(displayId, tellerId, customerNumber.Value);
 
     return Results.Ok(new
     {
         tellerId,
         displayId,
-        customerNumber
+        customerNumber = customerNumber.Value
     });
 });
+
+// app.MapGet("/", async (CurrencyRateRepos currencyRateRepos) =>
+// {
+//     var rates = currencyRateRepos.GetRates();
+
+//     return Results.Ok(rates);
+// });
 
 app.Run();
