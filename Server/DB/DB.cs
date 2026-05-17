@@ -41,7 +41,8 @@ public class DB
 
             CREATE TABLE IF NOT EXISTS Teller  (
                 id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-                name TEXT NOT NULL
+                name TEXT NOT NULL,
+                password TEXT NOT NULL
             );
 
             CREATE TABLE IF NOT EXISTS CurrencyRate (

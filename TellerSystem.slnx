@@ -2,8 +2,5 @@
   <Project Path="ExchangeRateDisplay/ExchangeRateDisplay.csproj" />
   <Project Path="QMS/QMS.csproj" />
   <Project Path="Server/Server.csproj" />
-  <Project Path="TellerApp/TellerApp.csproj">
-    <Platform Project="x86" />
-  </Project>
   <Project Path="TellerDisplay/TellerDisplay.csproj" />
 </Solution>

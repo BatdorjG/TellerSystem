@@ -9,14 +9,14 @@
   IgnorableNamespaces="uap rescap systemai">
 
   <Identity
-    Name="5329ab9d-3ab8-4a82-a92e-02d8c4823f88"
+    Name="575b04ef-506d-4dcf-a4c3-82ba2394fef5"
     Publisher="CN=Levth"
     Version="1.0.0.0" />
 
-  <mp:PhoneIdentity PhoneProductId="5329ab9d-3ab8-4a82-a92e-02d8c4823f88" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
+  <mp:PhoneIdentity PhoneProductId="575b04ef-506d-4dcf-a4c3-82ba2394fef5" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
   <Properties>
-    <DisplayName>TellerApp</DisplayName>
+    <DisplayName>App</DisplayName>
     <PublisherDisplayName>Levth</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
@@ -35,8 +35,8 @@
       Executable="$targetnametoken$.exe"
       EntryPoint="$targetentrypoint$">
       <uap:VisualElements
-        DisplayName="TellerApp"
-        Description="TellerApp"
+        DisplayName="App"
+        Description="App"
         BackgroundColor="transparent"
         Square150x150Logo="Assets\Square150x150Logo.png"
         Square44x44Logo="Assets\Square44x44Logo.png">
