@@ -23,6 +23,78 @@ public class CustomerRepos
 
         await command.ExecuteNonQueryAsync();
     }
+    public async Task<List<Account>> GetAccountsByCustomerId(int customerId)
+    {
+        using var connection = _db.Connect();
+        await connection.OpenAsync();
+
+        using var command = connection.CreateCommand();
+
+        command.CommandText = """
+            SELECT
+                id,
+                customer_id,
+                account_number,
+                account_type,
+                balance,
+                created_date
+            FROM Account
+            WHERE customer_id = $customerId;
+        """;
+
+        command.Parameters.AddWithValue("$customerId", customerId);
+
+        using var reader = await command.ExecuteReaderAsync();
+
+        var accounts = new List<Account>();
+
+        while (await reader.ReadAsync())
+        {
+            accounts.Add(new Account(
+                reader.GetInt32(0),
+                reader.GetInt32(1),
+                reader.GetString(2),
+                reader.GetString(3),
+                reader.GetInt32(4),
+                reader.GetInt64(5)
+            ));
+        }
+
+        return accounts;
+    }
+
+    public async Task<Customer?> GetCustomerByCustomerId(int customerId)
+    {
+        using var connection = _db.Connect();
+        await connection.OpenAsync();
+
+        using var command = connection.CreateCommand();
+
+        command.CommandText = """
+            SELECT
+                id,
+                name,
+                registNumber
+            FROM Customer
+            WHERE id = $customerId
+            LIMIT 1;
+        """;
+
+        command.Parameters.AddWithValue("$customerId", customerId);
+
+        using var reader = await command.ExecuteReaderAsync();
+                
+        if (!await reader.ReadAsync())
+            return null;
+
+        var customer = new Customer(
+            reader.GetInt32(0),
+            reader.GetString(1),
+            reader.GetString(2)
+        );
+
+        return customer;
+    }
 
     public async Task<Customer?> GetCustomerByRegistNumber(string registNumber)
     {

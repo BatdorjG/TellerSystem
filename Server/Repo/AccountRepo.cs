@@ -1,5 +1,5 @@
 using db;
-
+using Microsoft.Data.Sqlite;
 namespace Repository;
 
 public class AccountRepos
@@ -8,12 +8,24 @@ public class AccountRepos
 
     public async Task AddAccount(
         int customerId,
-        string accountNumber,
         string accountType
     )
-    {
+    {   
+    
         using var connection = _db.Connect();
         await connection.OpenAsync();
+
+        using var transaction = connection.BeginTransaction();
+
+        long? accountNumber = await CreateAccountNumber(connection, transaction); 
+
+        if (accountNumber == null)
+        {
+            accountNumber = 5000000000000001;
+        } else
+        {
+            accountNumber++;
+        }
 
         using var command = connection.CreateCommand();
 
@@ -43,6 +55,33 @@ public class AccountRepos
         );
 
         await command.ExecuteNonQueryAsync();
+    }
+
+    public async Task<int?> CreateAccountNumber(SqliteConnection connection, SqliteTransaction transaction)
+    {
+        using var command = connection.CreateCommand();
+        command.Transaction = transaction;
+        command.CommandText = """
+            SELECT account_number
+            FROM Account
+            ORDER BY account_number DES
+            LIMIT 1
+        """;
+
+        string accountNumber;
+
+        using (var reader = await command.ExecuteReaderAsync())
+        {
+            if (!await reader.ReadAsync())
+            {
+                transaction.Commit();
+                return null;
+            }
+
+            accountNumber = reader.GetString(0);
+        }
+
+        return int.TryParse(accountNumber, out int value) ? value : null;       
     }
 
     public async Task<Account?> GetAccount(

@@ -5,6 +5,7 @@ using QueueService;
 using Repository; 
 using db;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.VisualBasic;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi();
@@ -70,6 +71,7 @@ app.MapGet("/customer/next", async (
         customerNumber = customerNumber.Value
     });
 });
+
 app.MapPost("/teller/login", async (
     TellerLoginRequest req,
     TellerRepos tellerRepo) =>
@@ -93,13 +95,21 @@ app.MapPost("/customer/add", async (
     await customerRepo.AddCustomer(req.Name, req.RegistNumber);
 
     var customer = await customerRepo.GetCustomerByRegistNumber(req.RegistNumber);
+    
+    return Results.Ok(customer);
+});
 
+app.MapPost("/customer/account/add", async (
+    AddAccountRequest req,
+    CustomerRepos customserRepo,
+    AccountRepos accountRepo) =>
+{
+    var customer = await customserRepo.GetCustomerByCustomerId(req.CustomerId);
     if (customer == null)
-        return Results.BadRequest("Customer creation failed");
-
+        return Results.BadRequest("No such customer");
+    
     await accountRepo.AddAccount(
         customer.Id,
-        req.AccountNumber,
         req.AccountType
     );
 
@@ -156,6 +166,7 @@ app.MapPost("/account/change-balance", async (
         NewBalance = newBalance
     });
 });
+
 app.MapGet("/CurrencyRates", async (CurrencyRateRepos repo) =>
 {
     var rates = await repo.GetAll();
@@ -193,6 +204,12 @@ record TellerLoginRequest(
 record AddCustomerRequest(
     string Name,
     string RegistNumber,
+    string AccountNumber,
+    string AccountType
+);
+
+record AddAccountRequest(
+    int CustomerId,
     string AccountNumber,
     string AccountType
 );
