@@ -13,59 +13,87 @@ public class AccountRepository : IAccountRepository
         int customerId,
         string accountType
     )
-    {   
-    
+    {
         using var connection = _db.Connect();
         await connection.OpenAsync();
 
         using var transaction = connection.BeginTransaction();
 
-        long? accountNumber = await CreateAccountNumber(connection, transaction); 
-
-        if (accountNumber == null)
+        try
         {
-            accountNumber = 5000000000000001;
-        } else
-        {
-            accountNumber++;
-        }
+            long? accountNumber =
+                await CreateAccountNumber(connection, transaction);
 
-        using var command = connection.CreateCommand();
-        command.Transaction = transaction;
-        command.CommandText = """
-            INSERT INTO Account(
-                customer_id,
-                account_number,
-                account_type,
-                balance,
-                created_date
-            )
-            VALUES (
-                $customerId,
-                $accountNumber,
-                $accountType,
-                0,
-                $createdDate
+            if (accountNumber == null)
+            {
+                accountNumber = 5000000000000001;
+            }
+            else
+            {
+                accountNumber++;
+            }
+
+            using var command = connection.CreateCommand();
+
+            command.Transaction = transaction;
+
+            command.CommandText = """
+                INSERT INTO Account(
+                    customer_id,
+                    account_number,
+                    account_type,
+                    balance,
+                    created_date
+                )
+                VALUES (
+                    $customerId,
+                    $accountNumber,
+                    $accountType,
+                    0,
+                    $createdDate
+                );
+            """;
+
+            command.Parameters.AddWithValue(
+                "$customerId",
+                customerId
             );
-        """;
 
-        Console.WriteLine("EE");
+            command.Parameters.AddWithValue(
+                "$accountNumber",
+                accountNumber.ToString()
+            );
 
-        command.Parameters.AddWithValue("$customerId", customerId);
-        command.Parameters.AddWithValue("$accountNumber", accountNumber.ToString());
-        command.Parameters.AddWithValue("$accountType", accountType);
-        command.Parameters.AddWithValue(
-            "$createdDate",
-            DateTimeOffset.UtcNow.ToUnixTimeSeconds()
-        );
+            command.Parameters.AddWithValue(
+                "$accountType",
+                accountType
+            );
 
-        await command.ExecuteNonQueryAsync();
+            command.Parameters.AddWithValue(
+                "$createdDate",
+                DateTimeOffset.UtcNow.ToUnixTimeSeconds()
+            );
+
+            await command.ExecuteNonQueryAsync();
+
+            transaction.Commit();
+        }
+        catch
+        {
+            transaction.Rollback();
+            throw;
+        }
     }
 
-    public async Task<int?> CreateAccountNumber(SqliteConnection connection, SqliteTransaction transaction)
+    public async Task<long?> CreateAccountNumber(
+        SqliteConnection connection,
+        SqliteTransaction transaction
+    )
     {
         using var command = connection.CreateCommand();
+
         command.Transaction = transaction;
+
         command.CommandText = """
             SELECT account_number
             FROM Account
@@ -73,20 +101,18 @@ public class AccountRepository : IAccountRepository
             LIMIT 1
         """;
 
-        string accountNumber;
+        using var reader = await command.ExecuteReaderAsync();
 
-        using (var reader = await command.ExecuteReaderAsync())
+        if (!await reader.ReadAsync())
         {
-            if (!await reader.ReadAsync())
-            {
-                transaction.Commit();
-                return null;
-            }
-
-            accountNumber = reader.GetString(0);
+            return null;
         }
 
-        return int.TryParse(accountNumber, out int value) ? value : null;       
+        string accountNumber = reader.GetString(0);
+
+        return long.TryParse(accountNumber, out long value)
+            ? value
+            : null;
     }
 
     public async Task<Account?> GetAccount(

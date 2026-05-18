@@ -34,9 +34,12 @@ public class SocketPacket
         return data;
     }
 
-    public static SocketPacket FromBytes(byte[] data)
+    public static SocketPacket? FromBytes(byte[] data)
     {
-        return new SocketPacket
+        if (!IsChecksumValid(data))
+            return null;
+
+        var packet = new SocketPacket
         {
             Command = data[0],
             DisplayId = data[1],
@@ -46,6 +49,11 @@ public class SocketPacket
             Key2 = data[5],
             Key3 = data[6]
         };
+
+        if (!packet.IsCommandValid())
+            return null;
+
+        return packet;
     }
 
     public static byte CalculateChecksum(byte[] data)

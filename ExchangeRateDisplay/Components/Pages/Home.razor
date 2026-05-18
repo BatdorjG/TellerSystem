@@ -1,6 +1,8 @@
 ﻿@page "/"
 @using System.Net.Http.Json
 @using Microsoft.AspNetCore.SignalR.Client
+@using Shared
+@using UdpSockets
 @inject HttpClient http
 @implements IAsyncDisposable
 @rendermode InteractiveServer
@@ -40,12 +42,15 @@ else
 
     protected override async Task OnInitializedAsync()
     {
+
+        var uri = await UDPClient.SearchForServer();
+
         rates = await http.GetFromJsonAsync<List<CurrencyRate>>(
-            "http://10.38.59.186:5062/CurrencyRates"
+            $"{uri}/currency-rates"
         );
 
-        hubConnection = new HubConnectionBuilder()
-            .WithUrl("http://10.38.59.186:5062/currencyRateHub")
+       hubConnection = new HubConnectionBuilder()
+            .WithUrl($"{uri}/currencyRateHub")
             .WithAutomaticReconnect()
             .Build();
 
@@ -66,12 +71,6 @@ else
         });
 
         await hubConnection.StartAsync();
-    }
-
-    public record CurrencyRate
-    {
-        public string Code { get; set; } = "";
-        public double Rate { get; set; }
     }
 
     private string CurrencyName(string code)
