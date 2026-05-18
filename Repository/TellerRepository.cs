@@ -1,8 +1,10 @@
 using db;
+using IRepository;
+using Shared;
 
 namespace Repository;
 
-public class TellerRepos
+public class TellerRepository : ITellerRepository
 {
     private readonly DB _db = new();
 
@@ -80,9 +82,3 @@ public class TellerRepos
         return tellers;
     }
 }
-
-public record Teller(
-    int Id,
-    string Name,
-    string Password
-);

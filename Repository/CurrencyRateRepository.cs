@@ -1,14 +1,11 @@
 using db;
+using IRepository;
+using Shared;
 
 namespace Repository;
 
-public record CurrencyRate
-{
-    public string Code { get; set; } = "";
-    public double Rate { get; set; }
-}
 
-public class CurrencyRateRepos
+public class CurrencyRateRepository : ICurrencyRateRepository
 {
     private readonly DB _db = new();
 

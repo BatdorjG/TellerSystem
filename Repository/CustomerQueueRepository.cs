@@ -1,9 +1,11 @@
 using db;
 using Microsoft.Data.Sqlite;
+using IRepository;
+using Shared;
 
 namespace Repository;
 
-public class CustomerQueueRepos
+public class CustomerQueueRepository : ICustomerQueueRepository
 {
     private readonly DB _db = new();
 

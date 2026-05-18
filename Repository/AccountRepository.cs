@@ -1,8 +1,11 @@
 using db;
 using Microsoft.Data.Sqlite;
+using IRepository;
+using Shared;
+
 namespace Repository;
 
-public class AccountRepos
+public class AccountRepository : IAccountRepository
 {
     private readonly DB _db = new();
 
@@ -28,7 +31,7 @@ public class AccountRepos
         }
 
         using var command = connection.CreateCommand();
-
+        command.Transaction = transaction;
         command.CommandText = """
             INSERT INTO Account(
                 customer_id,
@@ -46,8 +49,10 @@ public class AccountRepos
             );
         """;
 
+        Console.WriteLine("EE");
+
         command.Parameters.AddWithValue("$customerId", customerId);
-        command.Parameters.AddWithValue("$accountNumber", accountNumber);
+        command.Parameters.AddWithValue("$accountNumber", accountNumber.ToString());
         command.Parameters.AddWithValue("$accountType", accountType);
         command.Parameters.AddWithValue(
             "$createdDate",
@@ -64,7 +69,7 @@ public class AccountRepos
         command.CommandText = """
             SELECT account_number
             FROM Account
-            ORDER BY account_number DES
+            ORDER BY account_number DESC
             LIMIT 1
         """;
 
@@ -85,7 +90,6 @@ public class AccountRepos
     }
 
     public async Task<Account?> GetAccount(
-        int customerId,
         string accountNumber
     )
     {
@@ -103,12 +107,10 @@ public class AccountRepos
                 balance,
                 created_date
             FROM Account
-            WHERE customer_id = $customerId
-            AND account_number = $accountNumber
+            WHERE account_number = $accountNumber
             LIMIT 1;
         """;
 
-        command.Parameters.AddWithValue("$customerId", customerId);
         command.Parameters.AddWithValue("$accountNumber", accountNumber);
 
         using var reader = await command.ExecuteReaderAsync();
@@ -213,12 +215,3 @@ public class AccountRepos
         await command.ExecuteNonQueryAsync();
     }
 }
-
-public record Account(
-    int Id,
-    int CustomerId,
-    string AccountNumber,
-    string AccountType,
-    int Balance,
-    long CreatedDate
-);

@@ -1,6 +1,9 @@
 <Solution>
   <Project Path="ExchangeRateDisplay/ExchangeRateDisplay.csproj" />
+  <Project Path="IRepository/IRepository.csproj" />
   <Project Path="QMS/QMS.csproj" />
+  <Project Path="Repository/Repository.csproj" />
   <Project Path="Server/Server.csproj" />
+  <Project Path="Shared/Shared.csproj" />
   <Project Path="TellerDisplay/TellerDisplay.csproj" />
 </Solution>

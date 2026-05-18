@@ -1,8 +1,10 @@
 using db;
+using IRepository;
+using Shared;
 
 namespace Repository;
 
-public class CustomerRepos
+public class CustomerRepository : ICustomerRepository
 {
     private readonly DB _db = new();
 
@@ -152,9 +154,3 @@ public class CustomerRepos
         return customers;
     }
 }
-
-public record Customer(
-    int Id,
-    string Name,
-    string RegistNumber
-);
